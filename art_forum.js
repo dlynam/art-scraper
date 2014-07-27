@@ -1,22 +1,27 @@
-exports.scrape = function(){ 
+exports.scrape = function(){
   require('node.io').scrape(function() {
     this.getHtml('http://www.artforum.com/picks/section=us', function(err, $) {
-      $('div.Item').each(function(item) {
-        var dateText = $('h3', item).text;
-        var entryDate = extractDate(dateText);
-        $('a', item).each(function(link) {
-          var names = extractNames(link.text);
-          mongoSave(names);
-        });
-        $('p', item).each(function(p) {
-          var names = extractNames(p.text);
-          mongoSave(names);
-        });
-      });
+      saveItems();
     });
   });
 }
-		
+
+function saveItems(){
+  $('div.Item').each(function(item) {
+    var dateText = $('h3', item).text;
+    var entryDate = extractDate(dateText);
+    extractNames('a', item);
+    extractNames('p', item);
+  });
+}
+
+function extractNames(el, item){
+  $(el, item).each(function(link) {
+    var names = extractNames(link.text);
+    mongoSave(names);
+  });
+}
+
 function extractDate(dateText){
 	d = dateText.match(dateRegex())[0] + ", 2012";
   console.log("");
@@ -30,7 +35,6 @@ function mongoSave(names){
     var name = names[i];
     if(capsCheck(name) == null){
       var testCommon = name.match(commonRegex);
-      //console.log(testCommon)
       if(testCommon == null){
         console.log(name)
       }
@@ -64,7 +68,7 @@ function commonWordsRegex(){
 
 function dateRegex(){
 	var months = "january|february|march|april|may|june|july|august|september|november|december";
-  var re = new RegExp("(" + months + ")\\s*\\d*", "i"); 
+  var re = new RegExp("(" + months + ")\\s*\\d*", "i");
   return re;
 }
 
@@ -79,4 +83,3 @@ function removeBlankNewlines(commonWords){
       break;
     }
   }
-}
