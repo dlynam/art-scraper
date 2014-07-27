@@ -24,7 +24,6 @@ function extractNames(el, item){
 
 function extractDate(dateText){
 	d = dateText.match(dateRegex())[0] + ", 2012";
-  console.log("");
   console.log(d);
 	return d;
 }
